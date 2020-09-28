@@ -1,0 +1,102 @@
+#cloud-config
+# vim: syntax=yaml
+#
+
+# The current version of cloud-init in the Hypriot rpi-64 is 0.7.9
+# When dealing with cloud-init, it is SUPER important to know the version
+# I have wasted many hours creating servers to find out the module I was trying to use wasn't in the cloud-init version I had
+# Documentation: http://cloudinit.readthedocs.io/en/0.7.9/index.html
+
+# Set your hostname here, the manage_etc_hosts will update the hosts file entries as well
+hostname: nextcloud-pi64
+manage_etc_hosts: true
+
+# This expands the root volume to the entire SD Card, similar to what the raspbian images did on first boot.
+# This doesn't seem to be required, its more here for posterity in understanding what is going on
+resize_rootfs: true
+growpart:
+    mode: auto
+    devices: ["/"]
+    ignore_growroot_disabled: false
+
+# You could modify this for your own user information
+users:
+  - name: pirate
+    gecos: "Hypriot Pirate"
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    groups: users,docker,video
+    plain_text_passwd: hypriot
+    lock_passwd: false
+    ssh_pwauth: true
+    chpasswd: { expire: false }
+
+# Update our packages on first boot, saves us some time
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+# Install any additional packages you need here
+# I add ntp because.. without it, rpi is useless in keeping track of time.
+packages:
+  - ntp
+
+# Set the locale of the system
+locale: "en_US.UTF-8"
+
+# Set the timezone
+# Value of 'timezone' must exist in /usr/share/zoneinfo
+timezone: "America/Los_Angeles"
+
+# Tell docker to tag this node appropriately
+# Currently we need the experimental?
+write_files:
+    - path: "/etc/docker/daemon.json"
+      owner: "root:root"
+      content: |
+        {
+          "labels": [ "os=linux", "arch=arm64" ],
+          "experimental": true
+        }
+
+# These commands will be ran once on first boot only
+runcmd:
+  # Pickup the hostname changes
+  - [ systemctl, restart, avahi-daemon ]
+  
+  # Pickup the daemon.json changes
+  - [ systemctl, restart, docker ]
+  
+  # Init a swarm, because why not
+  - [docker, swarm, init ]
+  
+  # Run portainer, so we can see our logs and control stuff from a UI
+  - [
+      docker, service, create, 
+      "--detach=false", 
+      "--name", "portainer", 
+      "--publish", "9000:9000", 
+      "--mount", "type=volume,src=portainer_data,dst=/data", 
+      "--mount", "type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock", 
+      "portainer/portainer", "-H", "unix:///var/run/docker.sock", "--no-auth"
+    ]
+
+  # Create a specific directory to store all the data, this way you could mount an external drive later (coming soon!)
+  - [mkdir, "-p", "/var/cloud/data" ]
+
+  # This gives the nextcloud permissions to write to this directory since it runs as www-data
+  - [setfacl, "-m", "u:www-data:rwx", "/var/cloud/data" ]
+
+  # Create the nextcloud instance configuring it on startup - you should change the user/password below to something less obvious or use the config UI
+  - [
+      docker, service, create, 
+      "--detach=false", 
+      "--name", "nextcloud", 
+      "--publish", "80:80", 
+      "--mount", "type=volume,src=nextcloud,dst=/var/www/html", 
+      "--mount", "type=bind,src=//var/cloud/data,dst=/var/www/html/data", 
+      "--env", "SQLITE_DATABASE=nextcloud", 
+      "--env", "NEXTCLOUD_ADMIN_USER=pirate", 
+      "--env", "NEXTCLOUD_ADMIN_PASSWORD=hypriot", 
+      "nextcloud:latest" 
+    ]

@@ -22,6 +22,7 @@
 source exports.sh
 envsubst < user-data-master.yml.tpl > user-data.yml
 envsubst < device-init.yaml.tpl > device-init.yaml
+envsubst < test.tpl > test
 
 # Unzip the image
 unzip hypriotos-rpi-v1.12.3.img.zip
@@ -31,7 +32,7 @@ flash \
   --bootconf config.txt \
   --config device-init.yaml \
   --device /dev/sdl \
-  #--file test \
+  --file test \
   hypriotos-rpi-v1.12.3.img
 
 rm hypriotos-rpi-v1.12.3.img
