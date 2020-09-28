@@ -8,24 +8,14 @@
 # Documentation: http://cloudinit.readthedocs.io/en/0.7.9/index.html
 
 # CAUTION
-network:
-  config: disabled
+#network:
+#  config: disabled
 
 # Set your hostname here, the manage_etc_hosts will update the hosts file entries as well
+preserve_hostname: false
 hostname: ${CLUSTER_MEMBER}
-fqdn: ${FQDN}
+fqdn: ${CLUSTER_MEMBER}.${FQDN}
 manage_etc_hosts: True
-
-# optional wireless network settings
-# To make wifi work with RPi3 and RPi0
-# you also have to set "enable_uart=0" in config.txt
-# See no-uart-config.txt for an example.
-#
-wifi:
-  interfaces:
-    wlan0:
-      ssid: ${SSID}
-      password: ${WIFI_PASSWORD}
 
 # This expands the root volume to the entire SD Card, similar to what the raspbian images did on first boot.
 # This doesn't seem to be required, its more here for posterity in understanding what is going on
@@ -84,14 +74,14 @@ apt:
         -----END PGP PUBLIC KEY BLOCK-----
 
 # Update our packages on first boot, saves us some time
-package_update: true
-package_upgrade: true
-package_reboot_if_required: true
+#package_update: true
+#package_upgrade: true
+#package_reboot_if_required: true
 
 # Install any additional packages you need here
 # https://cloudinit.readthedocs.io/en/0.7.9/topics/examples.html#run-apt-or-yum-upgrade
-apt_pipelining: false
-preserve_sources_list: false
+#apt_pipelining: false
+#preserve_sources_list: false
 #packages:
 #  - ntp
 #  - vim
@@ -102,103 +92,104 @@ preserve_sources_list: false
 #  - kubectl
 #  - isc-dhcp-server
 
-write_files:
+#write_files:
   # Network interfaces
-  - content: |
-      network: {config: disabled}
-    path: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-  - content: |
-      allow-hotplug wlan0
-      iface wlan0 inet static
-      address 192.168.1.60
-      netmask 255.255.255.0
-      broadcast 192.168.1.255
-      gateway 192.168.1.1
-      wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
-      iface default inet static
-    path: /etc/network/interfaces.d/wlan0
+  #- content: |
+  #    network: {config: disabled}
+  #  path: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
   
-  - content: |
-      allow-hotplug eth0
-      iface eth0 inet static
-      address 10.0.0.1
-      netmask 255.255.255.0
-      broadcast 10.0.0.255
-      gateway 10.0.0.1
-    path: /etc/network/interfaces.d/eth0
+  #- content: |
+  #    allow-hotplug wlan0
+  #    iface wlan0 inet static
+  #    address 192.168.1.60
+  #    netmask 255.255.255.0
+  #    broadcast 192.168.1.255
+  #    gateway 192.168.1.1
+  #    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+  #    iface default inet static
+  #  path: /etc/network/interfaces.d/wlan0
+  
+  #- content: |
+  #    allow-hotplug eth0
+  #    iface eth0 inet static
+  #    address 10.0.0.1
+  #    netmask 255.255.255.0
+  #    broadcast 10.0.0.255
+  #    gateway 10.0.0.1
+  #  path: /etc/network/interfaces.d/eth0
 
   # Please note, that you can either use your WiFi password directly or encrypted with wpa_passphrase OK
-  - content: |
-      country=${COUNTRY_CODE}
-      ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-      update_config=1
-      network={
-      ssid=${SSID}
-      psk=${WIFI_PASSWORD}
-      proto=RSN
-      key_mgmt=WPA-PSK
-      pairwise=CCMP
-      auth_alg=OPEN
-      }
-    path: /etc/wpa_supplicant/wpa_supplicant.conf
+  #- content: |
+  #    country=${COUNTRY_CODE}
+  #    ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+  #    update_config=1
+  #    network={
+  #    ssid=${SSID}
+  #    psk=${WIFI_PASSWORD}
+  #    proto=RSN
+  #    key_mgmt=WPA-PSK
+  #    pairwise=CCMP
+  #    auth_alg=OPEN
+  #    }
+  #  path: /etc/wpa_supplicant/wpa_supplicant.conf
   
   # NAT subnet OK
-  - content: |
-      # option definitions common to all supported networks...
-      option domain-name "cluster.home";
-      option domain-name-servers 8.8.8.8, 8.8.4.4;
-      # If this DHCP server is the official DHCP server for the local
-      # network, the authoritative directive should be uncommented.
-      authoritative;
-      # A slightly different configuration for an internal subnet.
-      subnet 10.0.0.0 netmask 255.255.255.0 {
-      range 10.0.0.2 10.0.0.10;
-      option domain-name-servers 8.8.8.8, 8.8.4.4;
-      option domain-name "cluster.home";
-      option routers 10.0.0.1;
-      option broadcast-address 10.0.0.255;
-      default-lease-time 600;
-      max-lease-time 7200;
-      }
-    path: /etc/dhcp/dhcpd.conf
+  #- content: |
+  #    # option definitions common to all supported networks...
+  #    option domain-name "cluster.home";
+  #    option domain-name-servers 8.8.8.8, 8.8.4.4;
+  #    # If this DHCP server is the official DHCP server for the local
+  #    # network, the authoritative directive should be uncommented.
+  #    authoritative;
+  #    # A slightly different configuration for an internal subnet.
+  #    subnet 10.0.0.0 netmask 255.255.255.0 {
+  #    range 10.0.0.2 10.0.0.10;
+  #    option domain-name-servers 8.8.8.8, 8.8.4.4;
+  #    option domain-name "cluster.home";
+  #    option routers 10.0.0.1;
+  #    option broadcast-address 10.0.0.255;
+  #    default-lease-time 600;
+  #    max-lease-time 7200;
+  #    }
+  #  path: /etc/dhcp/dhcpd.conf
 
   # Kubernetes CRI net conf OK
-  - content: |
-      net.bridge.bridge-nf-call-iptables=1
-      net.ipv4.ip_forward=1
-      net.bridge.bridge-nf-call-ip6tables=1
-      net.netfilter.nf_conntrack_max=1000000
-    path: /etc/sysctl.d/99-kubernetes-cri.conf
+  #- content: |
+  #    net.bridge.bridge-nf-call-iptables=1
+  #    net.ipv4.ip_forward=1
+  #    net.bridge.bridge-nf-call-ip6tables=1
+  #    net.netfilter.nf_conntrack_max=1000000
+  #  path: /etc/sysctl.d/99-kubernetes-cri.conf
 
   # br_netfilet OK
-  - content: |
-      br_netfilter
-    path: /etc/modules-load.d/netfilter.conf
+  #- content: |
+  #    br_netfilter
+  #  path: /etc/modules-load.d/netfilter.conf
 
   # isc-dhcp-server config OK
-  - content: |
-      INTERFACESv4="eth0"
-      INTERFACESv6=""
-    path: /etc/default/isc-dhcp-server
+  #- content: |
+  #    INTERFACESv4="eth0"
+  #    INTERFACESv6=""
+  #  path: /etc/default/isc-dhcp-server
 
   # CNI plugins network conf OK
-  - content: |
-      {
-        "cniVersion": "0.2.0",
-        "name": "mynet",
-        "type": "bridge",
-        "bridge": "cni0",
-        "isGateway": true,
-        "ipMasq": true,
-        "ipam": {
-          "type": "host-local",
-          "subnet": "10.22.0.0/16",
-          "routes": [
-              { "dst": "0.0.0.0/0" }
-          ]
-        }
-      }
-    path: /etc/cni/net.d/10-mynet.conf
+  #- content: |
+  #    {
+  #      "cniVersion": "0.2.0",
+  #      "name": "mynet",
+  #      "type": "bridge",
+  #      "bridge": "cni0",
+  #      "isGateway": true,
+  #      "ipMasq": true,
+  #      "ipam": {
+  #        "type": "host-local",
+  #        "subnet": "10.22.0.0/16",
+  #        "routes": [
+  #            { "dst": "0.0.0.0/0" }
+  #        ]
+  #      }
+  #    }
+  #  path: /etc/cni/net.d/10-mynet.conf
 
   # - content: |
   #     {
@@ -227,31 +218,27 @@ write_files:
   #     ]
   #   path: /etc/cni/net.d/10-mynet.conf
   
-  - content: |
-      {
-        "cniVersion": "0.2.0",
-        "name": "lo",
-        "type": "loopback"
-      }
-    path: /etc/cni/net.d/99-loopback.conf
+  #- content: |
+  #    {
+  #      "cniVersion": "0.2.0",
+  #      "name": "lo",
+  #      "type": "loopback"
+  #    }
+  #  path: /etc/cni/net.d/99-loopback.conf
 
   # Docker daemon OK
-  - content: |
-        {
-          "exec-opts": ["native.cgroupdriver=systemd"],
-          "live-restore": true,
-          "log-driver": "json-file",
-          "log-opts": {
-            "max-size": "10m",
-            "max-file": "5"
-          },
-          "storage-driver": "overlay2"
-        }
-    path: /etc/docker/daemon.json
-
-bootcmd:
-  # Add nodes to /etc/hosts CAUTION
-  - echo -e "10.0.0.1 master\n10.0.0.2 node1\n10.0.0.3 node2\n10.0.0.4 node3" | tee -a /etc/cloud/templates/hosts.debian.tmpl
+  #- content: |
+  #      {
+  #        "exec-opts": ["native.cgroupdriver=systemd"],
+  #        "live-restore": true,
+  #        "log-driver": "json-file",
+  #        "log-opts": {
+  #          "max-size": "10m",
+  #          "max-file": "5"
+  #        },
+  #        "storage-driver": "overlay2"
+  #      }
+  #  path: /etc/docker/daemon.json
 
 # These commands will be ran once on first boot only
 runcmd:
@@ -260,15 +247,18 @@ runcmd:
   # Note the space before "cgroup_enable=cpuset", to add a space after the last existing item on the line
   #- sed -i '$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/' /boot/cmdline.txt
 
+  # Add nodes to /etc/hosts CAUTION
+  - echo -e "10.0.0.1 master\n10.0.0.2 node1\n10.0.0.3 node2\n10.0.0.4 node3" | tee -a /etc/cloud/templates/hosts.debian.tmpl
+
   # Pickup the hostname changes OK
-  - [ systemctl, restart, avahi-daemon ]
+  - [systemctl, restart, avahi-daemon]
 
   # Ensure dhcpcd service is disabled to avoid duplicate default route OK
   - [systemctl, disable, dhcpcd]
 
   # Configure PKI for user
-  - echo ${CLUSTER_SSH_PRIVATE_KEY} | tr -d '\r' > /home/${CLUSTER_MEMBER}/.ssh/id_rsa && chmod 600 /home/${CLUSTER_MEMBER}/.ssh/id_rsa
-  - echo ${CLUSTER_SSH_PUBLIC_KEY} > /home/${CLUSTER_MEMBER}/.ssh/id_rsa.pub && chmod 644 /home/${CLUSTER_MEMBER}/.ssh/id_rsa.pub
+  #- echo CLUSTER_SSH_PRIVATE_KEY | tr -d '\r' > /home/${CLUSTER_MEMBER}/.ssh/id_rsa && chmod 600 /home/${CLUSTER_MEMBER}/.ssh/id_rsa
+  #- echo ${CLUSTER_SSH_PUBLIC_KEY} > /home/${CLUSTER_MEMBER}/.ssh/id_rsa.pub && chmod 644 /home/${CLUSTER_MEMBER}/.ssh/id_rsa.pub
 
   # NAT option 1 -> iptables
   - iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
@@ -284,19 +274,20 @@ runcmd:
   - ifup wlan0
 
   # Allow iptables to see bridged traffic
-  - modprobe br_netfilter
-  - sysctl --quiet --system
+  #- modprobe br_netfilter
+  #- sysctl --quiet --system
 
   # Intall packages
-  - apt-get update
-  - DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
-  - DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yq
-  - DEBIAN_FRONTEND=noninteractive apt-get autoclean -yq
-  - DEBIAN_FRONTEND=noninteractive apt-get autoremove -yq
-  - DEBIAN_FRONTEND=noninteractive apt-get install -yq ipset iptables arptables ebtables apt-transport-https nfs-common
-  - DEBIAN_FRONTEND=noninteractive apt-get install -y ntp vim curl, gnupg2, kubelet, kubeadm, kubectl, isc-dhcp-server
+  #- apt-get update
+  #- DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
+  #- DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yq
+  #- DEBIAN_FRONTEND=noninteractive apt-get autoclean -yq
+  #- DEBIAN_FRONTEND=noninteractive apt-get autoremove -yq
+  #- DEBIAN_FRONTEND=noninteractive apt-get install -yq ipset iptables arptables ebtables apt-transport-https nfs-common
+  #- DEBIAN_FRONTEND=noninteractive apt-get install -y ntp vim curl, gnupg2, kubelet, kubeadm, kubectl, isc-dhcp-server
+  
   # Keep kube* packages version
-  - apt-mark hold kubelet kubeadm kubectl
+  #- apt-mark hold kubelet kubeadm kubectl
 
   # Update eeprom
   #- rpi-eeprom-update -a
@@ -359,5 +350,7 @@ runcmd:
   #######     "--env", "NEXTCLOUD_ADMIN_PASSWORD=hypriot", 
   #######     "nextcloud:latest" 
   #######   ]
+
+  - export UPTIME=`uptime -s`
 
 final_message: "The system is finally up, after $UPTIME seconds"

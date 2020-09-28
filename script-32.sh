@@ -28,10 +28,10 @@ envsubst < test.tpl > test
 unzip hypriotos-rpi-v1.12.3.img.zip
 
 flash \
-  --userdata ./user-data.yml \
+  --userdata user-data.yml \
   --bootconf config.txt \
   --config device-init.yaml \
-  --device /dev/sdl \
+  --device $DEVICE \
   --file test \
   hypriotos-rpi-v1.12.3.img
 
