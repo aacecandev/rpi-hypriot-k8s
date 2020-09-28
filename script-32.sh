@@ -31,7 +31,7 @@ flash \
   --bootconf config.txt \
   --config device-init.yaml \
   --device /dev/sdl \
-  --file test \
+  #--file test \
   hypriotos-rpi-v1.12.3.img
 
 rm hypriotos-rpi-v1.12.3.img
