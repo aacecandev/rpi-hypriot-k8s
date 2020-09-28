@@ -1,0 +1,42 @@
+# memory
+gpu_mem=16
+
+# CMA - dynamic memory split
+# https://www.raspberrypi.org/forums/viewtopic.php?p=223549#p223549
+
+# camera settings, see http://elinux.org/RPiconfig#Camera
+# start_x=1
+# disable_camera_led=1
+
+# network
+# smsc95xx.macaddr=B8:AA:BC:DE:F0:12
+
+# Use HDMI mode even if no HDMI monitor is detected
+hdmi_force_hotplug=1
+
+# https://www.raspberrypi.org/documentation/configuration/uart.md
+enable_uart=0
+
+# Enable audio (added by raspberrypi-sys-mods)
+# dtparam=audio=on
+
+# TODO
+# https://elinux.org/RPiconfig#Overclocking
+
+# USB power
+# Pi 3 B+ USB power manager will change its output current limit (for all 4 USB ports combined) from 600mA to double that, 1200mA. 
+max_usb_current=1
+
+# ARMv8 on RPi3B
+# When running lscpu or cat /proc/cpuinfo the reported processor ist ARMv7
+# arm_control=0x200
+
+# http://www.raspberrypi.org/phpBB3/viewtopic.php?p=173430#p173430
+# http://www.raspberrypi.org/archives/2008
+# http://www.raspberrypi.org/phpBB3/viewtopic.php?p=169726#p169726
+# http://www.raspberrypi.org/phpBB3/viewtopic.php?f=29&t=11579#p169872
+# http://www.raspberrypi.org/archives/2008http://www.raspberrypi.org/phpBB3/viewtopic.php?f=29&t=6201&start=425#p180099
+# http://www.raspberrypi.org/phpBB3/viewtopic.php?f=29&t=6201&start=325#p170793
+# http://www.raspberrypi.org/phpBB3/viewtopic.php?f=29&t=6201&sid=852d546291ae711ffcd8bf23d3214581&start=325#p170793
+# http://www.raspberrypi.org/phpBB3/viewtopic.php?f=29&t=6201&start=275#p168042
+# https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=137932
